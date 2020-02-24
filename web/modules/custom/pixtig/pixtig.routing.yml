@@ -1,0 +1,7 @@
+pixtig.example:
+  path: '/pixtig/example'
+  defaults:
+    _title: 'Example Pixtig'
+    _controller: '\Drupal\pixtig\Controller\PixtigController::build'
+  requirements:
+    _permission: 'access content'

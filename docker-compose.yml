@@ -1,0 +1,72 @@
+version: '3.1'
+services:
+# Ejemplo de url: http://URL-DE-PROYECTO:8000
+  web:
+    build: .
+    container_name: "${PROJECT_NAME}_apache"
+    ports:
+    - "8000:80"
+    volumes:
+    - .:/var/www/html:cached
+    restart: always
+
+  db:
+    image: mysql:$MYSQL_TAG
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: "${PROJECT_NAME}_mysql"
+    volumes:
+    - ./db-backups:/var/mysql/backups:delegated
+    - ./mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+      MYSQL_USER: $DB_USER
+      MYSQL_PASSWORD: $DB_PASSWORD
+    ports:
+    - "3306:3306"
+
+# Ejemplo de url: http://URL-DE-PROYECTO:8001
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: "${PROJECT_NAME}_phpmyadmin"
+    environment:
+      PMA_HOST: "${PROJECT_NAME}_mysql" # Para la instalacion el host sera: db
+      PMA_USER: $DB_ROOT_PASSWORD
+      PMA_PASSWORD: $DB_ROOT_PASSWORD
+      PHP_UPLOAD_MAX_FILESIZE: 1G
+      PHP_MAX_INPUT_VARS: 1G
+    ports:
+    - "8001:80"
+
+#  mailhog:
+#    image: mailhog/mailhog
+#    container_name: "${PROJECT_NAME}_mailhog"
+#    labels:
+#      - 'traefik.backend=${PROJECT_NAME}_mailhog'
+#      - 'traefik.port=8025'
+#      - 'traefik.frontend.rule=Host:mailhog.${PROJECT_BASE_URL}'
+#    ports:
+#    - "8025:8025"
+
+# Ejemplo de url: http://portainer.URL-DE-PROYECTO:8002/#/home
+  portainer:
+    image: portainer/portainer
+    container_name: "${PROJECT_NAME}_portainer"
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.backend=${PROJECT_NAME}_portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.${PROJECT_BASE_URL}'
+
+# Ejemplo de url: http://URL-DE-PROYECTO:8080/dashboard/
+  traefik:
+    image: traefik
+    container_name: "${PROJECT_NAME}_traefik"
+    command: -c /dev/null --web --docker --logLevel=INFO
+    ports:
+      - '8002:80'   # Portainer
+      - '8080:8080' # Dashboard for traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

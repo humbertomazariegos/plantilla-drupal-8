@@ -1,0 +1,55 @@
+image: registry.gitlab.com/pixtig/plantillas/drupal-8
+
+stages:
+#- test
+- deploy
+
+#unit_test:
+#  stage: test
+#  tags:
+#  - dev
+#  script:
+#    - echo "Unit test skyped"
+#  only:
+#    refs:
+#    - master
+
+deploy_develop:
+  stage: deploy
+  tags:
+  - dev
+  script:
+  - 'which ssh-agent || ( apt-get install -y openssh-client  )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - ~/.composer/vendor/bin/envoy run deploy
+#  dependencies:
+#  - unit_test
+  environment:
+    name: production
+    url: http://192.168.1.2
+  when: on_success
+  only:
+    refs:
+    - master
+#deploy_stage:
+#  stage: deploy
+#  tags:
+#  - dev
+#  script:
+#  - 'which ssh-agent || ( apt-get update -y && apt-get install -y openssh-client  )'
+#  - eval $(ssh-agent -s)
+#  - ssh-add <(echo "$SSH_PRIVATE_HONDA")
+#  - mkdir -p ~/.ssh
+#  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+#  - ~/.composer/vendor/bin/envoy run deploy_honda
+#  - ~/.composer/vendor/bin/envoy run deploy_honda_desarrollo
+#  environment:
+#    name: production
+#    url: http://192.168.1.2
+#  when: on_success
+#  only:
+#    refs:
+#    - live

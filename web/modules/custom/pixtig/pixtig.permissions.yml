@@ -1,0 +1,4 @@
+administer pixtig configuration:
+  title: 'Administer pixtig configuration'
+  description: 'Optional description.'
+  restrict access: true

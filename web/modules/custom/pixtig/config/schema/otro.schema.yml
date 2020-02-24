@@ -1,0 +1,7 @@
+block.settings.otro_otro_ejemplo:
+  type: block_settings
+  label: 'Otro ejemplo block'
+  mapping:
+    foo:
+      type: string
+      label: Foo

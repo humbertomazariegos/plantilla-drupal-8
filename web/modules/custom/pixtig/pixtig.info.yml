@@ -1,0 +1,5 @@
+name: pixtig
+type: module
+description: Modulo de ejemplo de pixtig
+package: Pixtig
+core: 8.x
